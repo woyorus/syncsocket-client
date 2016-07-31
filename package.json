@@ -4,7 +4,9 @@
   "description": "Synchronized messaging application framework client",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --reporter spec -w",
+    "test:single": "mocha --reporter spec",
+    "cover": "istanbul cover _mocha -- -R spec test/*"
   },
   "repository": {
     "type": "git",
@@ -31,5 +33,10 @@
     "object-fsm": "0.4.3",
     "socket.io-client": "1.4.8",
     "syncsocket-clock-client": "0.1.4"
+  },
+  "devDependencies": {
+    "chai": "3.5.0",
+    "istanbul": "0.4.4",
+    "mocha": "2.5.3"
   }
 }
