@@ -1,0 +1,35 @@
+{
+  "name": "syncsocket-client",
+  "version": "0.1.0",
+  "description": "Synchronized messaging application framework client",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woyorus/syncsocket-client.git"
+  },
+  "keywords": [
+    "syncsocket",
+    "realtime",
+    "truetime",
+    "synchronization",
+    "events"
+  ],
+  "author": "Kirill Kravinsky <woyorus@gmail.com> (http://github.com/woyorus)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/woyorus/syncsocket-client/issues"
+  },
+  "homepage": "https://github.com/woyorus/syncsocket-client#readme",
+  "dependencies": {
+    "component-bind": "1.0.0",
+    "component-emitter": "1.2.1",
+    "debug": "2.2.0",
+    "inherits": "2.0.1",
+    "object-fsm": "0.4.3",
+    "socket.io-client": "1.4.8",
+    "syncsocket-clock-client": "0.1.4"
+  }
+}
