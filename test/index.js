@@ -27,7 +27,7 @@ describe('connection', function () {
 
     afterEach(function (done) {
         connection.on('disconnected', () => done());
-        connection.disconnect();
+        connection.close();
     });
 
 

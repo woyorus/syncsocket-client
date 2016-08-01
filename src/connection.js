@@ -27,7 +27,7 @@ function Connection(uri) {
  * @returns {Connection}
  * @public
  */
-Connection.prototype.disconnect = function() {
+Connection.prototype.close = function() {
     if (this.connected === false)
         return this;
 
@@ -143,7 +143,7 @@ Connection.prototype.onMessage = function(envelope) {
 Connection.prototype.bindEvents = function() {
     this.socket.on('connect', bind(this, 'onConnected'));
     this.socket.on('error', bind(this, 'onError'));
-    this.socket.on('disconnect', bind(this, 'onDisconnected'));
+    this.socket.on('close', bind(this, 'onDisconnected'));
     this.socket.on('message', bind(this, 'onMessage'));
 };
 
@@ -157,8 +157,8 @@ Connection.prototype.onSystemMessage = function(envelope) {
     debug('received _SYSTEM message: %s', topic);
 
     switch (topic) {
-        case 'disconnect':
-            this.disconnect();
+        case 'close':
+            this.close();
             break;
     }
 };
