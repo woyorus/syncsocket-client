@@ -4,7 +4,6 @@
  */
 
 const Connection = require('./connection');
-const debug = require('debug')('syncsocket-client');
 
 /**
  * Module exports

@@ -1,47 +1,24 @@
-/**
- *  Module dependencies
- */
-
-const Emitter = require('component-emitter');
 const io = require('socket.io-client');
 const debug = require('debug')('syncsocket-client:connection');
 const bind = require('component-bind');
+const Emitter = require('component-emitter');
 const Channel = require('./channel');
 
-/**
- *  Exports
- */
-
 module.exports = exports = Connection;
-
-/**
- *  Mix in 'component-emitter'
- */
 
 Emitter(Connection.prototype);
 
 /**
- *
- * @param uri
- * @param opts
+ * Creates new `Connection` object
+ * @param uri URI of SyncSocket server (e.g. http://localhost:5579)
  * @constructor
  * @public
  */
-function Connection(uri, opts) {
-    if (typeof uri == 'object') {
-        opts = uri;
-        uri = undefined;
-    }
-
-    opts = opts || {};
-    this.instanceId = opts.instanceId || 'syncsocket-instance';
-
-    this.bound = false;
+function Connection(uri) {
+    if (!(this instanceof Connection)) return new Connection(uri);
     this.connected = false;
     this.channels = {};
-
-    opts.query = 'instanceId=' + this.instanceId;
-    this.socket = io.connect(uri, opts);
+    this.socket = io.connect(uri);
     this.bindEvents();
 }
 
@@ -178,14 +155,10 @@ Connection.prototype.onMessage = function(envelope) {
  * @private
  */
 Connection.prototype.bindEvents = function() {
-    if (this.bound) return;
-
     this.socket.on('connect', bind(this, 'onConnected'));
     this.socket.on('error', bind(this, 'onError'));
     this.socket.on('disconnect', bind(this, 'onDisconnected'));
     this.socket.on('message', bind(this, 'onMessage'));
-
-    this.bound = true;
 };
 
 /**

@@ -1,7 +1,3 @@
-/**
- *  Module dependencies
- */
-
 const Emitter = require('component-emitter');
 const ObjectFsm = require('object-fsm');
 const ClockClient = require('syncsocket-clock-client');
@@ -9,15 +5,7 @@ const inherits = require('inherits');
 const debug = require('debug')('syncsocket-client:channel');
 const bind = require('component-bind');
 
-/**
- * Module exports
- */
-
 module.exports = exports = Channel;
-
-/**
- * Mix in emitter
- */
 
 Emitter(Channel.prototype);
 
@@ -45,7 +33,7 @@ function Channel(connection, opts) {
     ObjectFsm(this);
     this.initStateMachine();
 
-    /** Hackery **/
+    /* Hackery */
     this.reportTransition('uninitialized');
 }
 
@@ -136,6 +124,7 @@ Channel.prototype.publish = function (topic, data) {
 /**
  * Force synchronize clockClient
  * @return {[type]} [description]
+ * @private
  */
 Channel.prototype.synchronize = function () {
     this.handleEvent('synchronize');
@@ -247,10 +236,6 @@ Channel.prototype.processServiceMessage = function (envelope) {
 
     }
 };
-
-/**
- *  State machine transition handlers
- */
 
 /**
  * To 'initialized' state transition handler

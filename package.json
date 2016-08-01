@@ -30,13 +30,14 @@
     "component-emitter": "1.2.1",
     "debug": "2.2.0",
     "inherits": "2.0.1",
-    "object-fsm": "0.4.3",
+    "object-fsm": "0.4.4",
     "socket.io-client": "1.4.8",
     "syncsocket-clock-client": "0.1.4"
   },
   "devDependencies": {
     "chai": "3.5.0",
     "istanbul": "0.4.4",
-    "mocha": "2.5.3"
+    "mocha": "2.5.3",
+    "syncsocket": "0.1.2"
   }
 }
