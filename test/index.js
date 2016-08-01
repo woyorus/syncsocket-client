@@ -34,7 +34,7 @@ describe('connection', function () {
     it('should join channel', function (done) {
         var connection = connect(env.url);
         connection.on('connected', function () {
-            connection.join(env.testChannelId)
+            connection.joinChannel(env.testChannelId)
                 .then(channel => {
                     expect(channel).to.be.an('object');
                     done();
@@ -46,7 +46,7 @@ describe('connection', function () {
     it('should post and receive a message', function (done) {
         var connection = connect(env.url);
         connection.on('connected', () => {
-            connection.join(env.testChannelId, { canPublish: true })
+            connection.joinChannel(env.testChannelId, { canPublish: true })
                 .then(channel => {
                     channel.on('syncSuccessful', () => {
                         let prepareWasCalled = false;

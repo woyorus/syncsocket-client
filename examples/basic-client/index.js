@@ -1,7 +1,7 @@
 var connect = require('../../src/index');
 
 var connection = connect('http://localhost:6024');
-connection.join('super-channel', { canPublish: true })
+connection.joinChannel('super-channel', { canPublish: true })
     .then(channel => {
         setTimeout(() => {
             channel.subscribe('hey', () => {

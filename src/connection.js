@@ -24,71 +24,49 @@ function Connection(uri) {
 
 /**
  * Disconnects from the server
- * @returns {Connection}
  * @public
  */
 Connection.prototype.close = function() {
-    if (this.connected === false)
-        return this;
-
     this.socket.close();
-    return this;
 };
 
 /**
  * Attempt joining a channel with id `channelId`.
  * @param channelId
- * @param opts
- * @returns a promise. Fullfilled promise returns the `Channel` object, rejected — error message.
+ * @param canPublish
+ * @returns {Promise} Fulfilled promise returns the `Channel` object, rejected — error message.
  * @public
  */
-Connection.prototype.join = function(channelId, opts) {
-    opts = opts || {
-            canPublish: false
-        };
-    opts.channelId = channelId;
-    var that = this;
-    return new Promise(function(resolve, reject) {
-        that.sendRequest('join_channel', opts)
-            .then(function(response) {
+Connection.prototype.joinChannel = function(channelId, canPublish) {
+    var channelSpec = {
+        canPublish: canPublish,
+        channelId: channelId
+    };
+    return new Promise((resolve, reject) => {
+        this.sendRequest('join_channel', channelSpec)
+            .then((response) => {
                 debug('joined channel: %s', channelId);
-                var spec = {
-                    channelId: channelId,
-                    canPublish: opts.canPublish
-                };
-                var channel = new Channel(that, spec);
-                that.channels[channelId] = channel;
+                var channel = new Channel(that, channelSpec);
+                this.channels[channelId] = channel;
                 resolve(channel);
             })
             .catch(function(err) {
-                reject('cannot join channel "' + channelId + '"');
+                reject('cannot join channel "' + channelId + '". ' + err.message);
             });
     });
 };
 
 /**
- * Subscribe for inbound messages (sent on server via client.pushMessage)
- * @param topic
- * @param cb
- */
-Connection.prototype.subscribe = function(topic, cb) {
-    this.socket.on('inbound.' + topic, cb);
-};
-
-/**
- *
- * @param what
- * @param data
- * @returns {*|promise}
+ * Sends a request to the server.
+ * @param what Like a topic
+ * @param {object} data
+ * @returns {Promise} Resolved with `response`, rejected with error
  * @private
  */
 Connection.prototype.sendRequest = function(what, data) {
-    var that = this;
-    return new Promise(function(resolve, reject) {
-        that.socket.emit('request', {
-            what: what,
-            body: data
-        }, function(err, response) {
+    return new Promise((resolve, reject) => {
+        let reqData = { what: what, body: data };
+        this.socket.emit('request', reqData, (err, response) => {
             if (err) {
                 return reject(err);
             }
