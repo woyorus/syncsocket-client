@@ -22,20 +22,6 @@ function Connection(uri) {
     this.bindEvents();
 }
 
-
-/**
- * Connects to the server (set as connection's `uri` attribute)
- * @returns {Connection}
- * @public
- */
-Connection.prototype.connect = function() {
-    if (this.connected === true)
-        return this;
-
-    this.socket.open();
-    return this;
-};
-
 /**
  * Disconnects from the server
  * @returns {Connection}
