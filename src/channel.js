@@ -9,26 +9,24 @@ module.exports = exports = Channel;
 
 Emitter(Channel.prototype);
 
-
 /**
  * Channel constructor
  * @param connection
- * @param {Object} opts Connection options
- * @param {string} opts.channelId The channel identifier
- * @param {Boolean} opts.isPublisher Flag whether or not user can publish to this channel
+ * @param {Object} spec Connection options
+ * @param {string} spec.channelId The channel identifier
+ * @param {Boolean} spec.isPublisher Flag whether or not user can publish to this channel
  * @constructor
  * @public
  */
-function Channel(connection, opts) {
-    if (!(this instanceof Channel)) return new Channel(connection, opts);
+function Channel(connection, spec) {
+    if (!(this instanceof Channel)) return new Channel(connection, spec);
 
     this.connection = connection;
-    this.channelId = opts.channelId;
-    this.isPublisher = opts.canPublish;
+    this.channelId = spec.channelId;
+    this.canPublish = spec.canPublish;
     this.subscribedTopics = [];
-    this.topicCallbacks = {};
-    this.topicPrepareCallbacks = {};
-
+    this.fireCallbacks = {};
+    this.prepareCallbacks = {};
 
     ObjectFsm(this);
     this.initStateMachine();
@@ -37,42 +35,50 @@ function Channel(connection, opts) {
     this.reportTransition('uninitialized');
 }
 
+
 /**
  * Initializes the channel's state machine
  * @private
  */
 Channel.prototype.initStateMachine = function () {
-    this.addState(
+    this.initStates();
+    this.initEvents();
+    this.setStartingState('uninitialized');
+
+    // Report every successful transition back to server
+    this.on('didTransition', function (fromState, toState) {
+        this.reportTransition(toState);
+        this.emit('transition', fromState, toState);
+    });
+};
+
+Channel.prototype.initStates = function () {
+    this.addStates
+    (
         'uninitialized',
         'unsynchronized',
         'idle',
         'ready',
         'scheduled'
     );
+};
 
+Channel.prototype.initEvents = function () {
     this.addEvent('initialize', 'uninitialized', 'unsynchronized', (spec) => this.onInitialize(spec));
     this.addEvent('synchronize', ['unsynchronized', 'idle', 'ready', 'scheduled'], 'idle', () => this.onSynchronize());
     this.addEvent('cancel', ['ready', 'scheduled'], 'idle');
     this.addEvent('prepare', 'idle', 'ready', (env) => this.onPrepare(env));
     this.addEvent('schedule', 'ready', 'scheduled', (env) => this.onSchedule(env));
     this.addEvent('finalize', 'scheduled', 'idle');
-
-    this.setStartingState('uninitialized');
-
-    // Report every successful transition back to server
-    this.on('didTransition', function (fromState, toState, event) {
-        this.reportTransition(toState);
-        this.emit('transition', fromState, toState);
-    });
 };
 
 /**
- *
+ * Notifies server about state change
  * @param toState
  * @private
  */
 Channel.prototype.reportTransition = function (toState) {
-    debug(' > [%s] Reporting transition to state -> %s', this.channelId, toState);
+    this.channelDebug(' > Reporting transition to state -> %s', toState);
     this.publishService('reportstate', {toState: toState});
 };
 
@@ -80,34 +86,32 @@ Channel.prototype.reportTransition = function (toState) {
 /**
  * Subscribes for messages on given `topic`.
  * Subscribing to topic `#` will make you subscribe to any message in the channel.
- * @param topic
- * @param callbackPrepare -- The callback called during prepare transition
- * @param callbackFire -- The callback called during the 'fire' event
- * @returns {Channel}
+ * @param {string} topic
+ * @param {function(*):*} prepareCallback -- The callback called during prepare transition
+ * @param {function(*):*} fireCallback -- The callback called during the 'fire' event
  * @public
  */
-Channel.prototype.subscribe = function (topic, callbackPrepare, callbackFire) {
+Channel.prototype.subscribe = function (topic, prepareCallback, fireCallback) {
     this.subscribedTopics.push(topic);
-    this.topicPrepareCallbacks[topic] = callbackPrepare;
-    this.topicCallbacks[topic] = callbackFire;
-    return this;
+    this.prepareCallbacks[topic] = prepareCallback;
+    this.fireCallbacks[topic] = fireCallback;
 };
 
 /**
  * Publishes a message to the channel
- * @param topic
- * @param data
- * @returns {Channel}
+ * @param {string} topic
+ * @param {object} data
  * @public
  */
 Channel.prototype.publish = function (topic, data) {
-    debug('publishing message: { topic: ' + topic + ', data: ' + data + ' }');
+    this.channelDebug('publishing message: { topic: ' + topic + ', data: ' + data + ' }');
 
-    if (this.isPublisher === false) {
+    if (this.canPublish === false)
+    {
         var reason = 'insufficient privileges for publishing messages (channel: ' + this.channelId + ')';
-        debug(reason);
+        this.channelDebug(reason);
         this.emit('error', reason);
-        return this;
+        return;
     }
 
     var envelope =
@@ -118,55 +122,21 @@ Channel.prototype.publish = function (topic, data) {
     };
 
     this.connection.sendMessage(envelope);
-    return this;
 };
 
 /**
- * Force synchronize clockClient
- * @return {[type]} [description]
- * @private
- */
-Channel.prototype.synchronize = function () {
-    this.handleEvent('synchronize');
-};
-
-/**
- *
- * @param topic
- * @param data
- * @returns {Channel}
- * @private
- */
-Channel.prototype.publishService = function (topic, data) {
-    //debug('publishing sys message: { topic: ' + topic + ', data: ' + data + ' }');
-
-    var envelope =
-    {
-        channelId: this.channelId,
-        topic: 'service.' + topic,
-        data: data
-    };
-
-    this.connection.sendMessage(envelope);
-    return this;
-};
-
-/**
- *
+ * Injects message into the channel. Distributes it either to `processUserMessage` or to `processServiceMessage`
  * @param envelope
  * @private
  */
 Channel.prototype.injectMessage = function (envelope) {
-    var topic = envelope.topic;
-
-    var topicParts = topic.split('.');
-
-    switch (topicParts[0]) {
-
+    var topicParts = envelope.topic.split('.');
+    switch (topicParts[0])
+    {
         case 'user':
             // Check if we have this subscription
-            if (this.subscribedTopics.indexOf(topicParts[1]) != -1 ||
-                this.subscribedTopics.indexOf('#') != -1) {
+            if (this.subscribedTopics.indexOf(topicParts[1]) !== -1 ||
+                this.subscribedTopics.indexOf('#') !== -1) {
                 this.processUserMessage(envelope);
             }
             break;
@@ -174,7 +144,6 @@ Channel.prototype.injectMessage = function (envelope) {
         case 'service':
             this.processServiceMessage(envelope);
             break;
-
     }
 };
 
@@ -187,7 +156,7 @@ Channel.prototype.processUserMessage = function (envelope) {
     var topicParts = envelope.topic.split('.');
     var userTopic = topicParts[1];
     var transition = topicParts[2];
-    this.chdebug('processing user message: ' + userTopic + ', transition: ' + transition);
+    this.channelDebug('processing user message: ' + userTopic + ', transition: ' + transition);
 
     switch (transition) {
 
@@ -200,24 +169,22 @@ Channel.prototype.processUserMessage = function (envelope) {
             break;
 
         default:
-            debug('invalid transition -> %s', transition);
+            this.channelDebug('invalid transition -> %s', transition);
 
     }
 };
 
 /**
- *
+ * Server switches states on clients using this.
  * @param envelope
  * @private
  */
 Channel.prototype.processServiceMessage = function (envelope) {
-    var topic = envelope.topic;
     var data = envelope.data;
+    var topicParts = envelope.topic.split('.');
 
-    var topicParts = topic.split('.');
-
-    switch (topicParts[1]) {
-
+    switch (topicParts[1])
+    {
         case 'initialize':
             this.handleEvent('initialize', data);
             break;
@@ -231,81 +198,61 @@ Channel.prototype.processServiceMessage = function (envelope) {
             break;
 
         default:
-            debug('unrecognized service message caught: %s', topicParts[1]);
+            this.channelDebug('unrecognized service message caught: %s', topicParts[1]);
             break;
-
     }
 };
 
-/**
- * To 'initialized' state transition handler
- * @private
- */
 Channel.prototype.onInitialize = function (spec) {
-    if (typeof spec.timeserver === 'undefined') throw 'Initialized with undefined timeserver';
+    if (typeof spec.timeserver === 'undefined') {
+        this.channelDebug('Initialized with undefined timeserver');
+    }
     this.timeserver = spec.timeserver;
-    this.chdebug('Initializing with timeserver \'' + this.timeserver + '\'');
-
+    this.channelDebug('Initializing with timeserver \'' + this.timeserver + '\'');
     this.clockClient = new ClockClient(this.timeserver);
 };
 
-/**
- * To 'synchronized' state transition handler
- * @private
- */
 Channel.prototype.onSynchronize = function () {
-    var that = this;
-    this.chdebug('Synchronizing with timeserver \'' + this.timeserver + '\'...');
+    this.channelDebug('Synchronizing with timeserver \'' + this.timeserver + '\'...');
     this.deferTransition();
 
     this.clockClient.sync()
         .then(result => {
             if (result.successful === true) {
-                debug('sync successful!');
+                this.channelDebug('sync successful!');
                 this.emit('syncSuccessful', result.precision, result.adjust);
                 this.lastSyncResult = result;
                 this.finalizeTransition();
             } else {
-                debug('sync failed!');
+                this.channelDebug('sync failed!');
                 this.emit('syncFailed', result.precision);
             }
         })
         .catch(err => console.error(err));
 };
 
-/**
- * To 'prepared' state transition handler
- * @private
- */
 Channel.prototype.onPrepare = function (envelope) {
     var topicParts = envelope.topic.split('.');
     var userTopic = topicParts[1];
-    var callback = this.topicPrepareCallbacks[userTopic];
-    callback(envelope.data, envelope);
+    var callback = this.prepareCallbacks[userTopic];
+    // Delay transition to ready until done() is called from the callback
+    this.deferTransition();
+    callback(envelope.data, () => this.finalizeTransition());
 };
 
-
-/**
- * To 'scheduled' state transition handler
- * @private
- */
 Channel.prototype.onSchedule = function (envelope) {
-    var that = this;
     var topicParts = envelope.topic.split('.');
     var userTopic = topicParts[1];
-    var callback = this.topicCallbacks[userTopic];
+    var callback = this.fireCallbacks[userTopic];
     var timeticket = envelope.headers['x-cct-timeticket'];
     var fireIn = (timeticket - this.lastSyncResult.adjust) - Date.now();
-    this.chdebug('scheduling event: ' + userTopic + ' in ' + fireIn + ' ms');
-    setTimeout(function () {
+    setTimeout(() => {
         callback(envelope.data, envelope);
-        that.handleEvent('finalize');
+        this.handleEvent('finalize');
     }, fireIn);
+    this.channelDebug('scheduled event: ' + userTopic + ' in ' + fireIn + ' ms');
 };
 
-/**
- * @private
- */
-Channel.prototype.chdebug = function (msg) {
+Channel.prototype.channelDebug = function (msg) {
     debug('[%s][%s] %s', this.channelId, this.state, msg);
 };

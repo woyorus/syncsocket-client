@@ -1,28 +1,15 @@
-
-/**
- * Module dependencies
- */
-
 const Connection = require('./connection');
-
-/**
- * Module exports
- */
 
 module.exports = exports = connect;
 
-
 /**
- * Attempts connection to a together server.
- * Opts doesn't do anything now, it is here for the future.
- *
- * @returns a `Connection` object.
- *
- * @api public
+ * Attempts connection to a SyncSocket server.
+ * @param {string} uri Server URI
+ * @returns {Connection} `Connection` object.
+ * @public
  */
-
-function connect(uri, opts) {
-    return new Connection(uri, opts);
+function connect(uri) {
+    return new Connection(uri);
 }
 
 exports.connect = connect;

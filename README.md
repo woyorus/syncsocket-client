@@ -15,7 +15,7 @@ Channel constructor
 -   `connection`  
 -   `opts` **[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** Connection options
     -   `opts.channelId` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** The channel identifier
-    -   `opts.isPublisher` **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** Flag whether or not user can publish to this channel
+    -   `opts.canPublish` **[Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** Flag whether or not user can publish to this channel
 
 ### subscribe
 

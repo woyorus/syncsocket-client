@@ -16,7 +16,6 @@ Emitter(Connection.prototype);
  */
 function Connection(uri) {
     if (!(this instanceof Connection)) return new Connection(uri);
-    this.connected = false;
     this.channels = {};
     this.socket = io.connect(uri);
     this.bindEvents();
@@ -79,9 +78,38 @@ Connection.prototype.sendMessage = function(envelope) {
     this.socket.emit('message', envelope);
 };
 
+Connection.prototype.bindEvents = function() {
+    this.socket.on('connect', bind(this, 'onConnected'));
+    this.socket.on('error', bind(this, 'onError'));
+    this.socket.on('close', bind(this, 'onDisconnected'));
+    this.socket.on('message', bind(this, 'onMessage'));
+};
+
+/**
+ * Distributes received message to its channel object
+ * @param envelope
+ * @private
+ */
+Connection.prototype.onMessage = function(envelope) {
+    var channel = envelope.channelId;
+    debug('received message: \'' + envelope.topic + '\' (ch. -> ' + channel + ')');
+
+    if (channel === '_SYSTEM')
+    {
+        this.onSystemMessage(envelope);
+        return;
+    }
+
+    if (typeof this.channels[channel] === 'undefined')
+    {
+        debug('received a message for channel that doesn\'t exist! -> %s', channel);
+    }
+
+    this.channels[channel].injectMessage(envelope);
+};
+
 Connection.prototype.onConnected = function() {
     debug('connected to server');
-    this.connected = true;
     this.emit('connected');
 };
 
@@ -92,49 +120,20 @@ Connection.prototype.onError = function(err) {
 
 Connection.prototype.onDisconnected = function() {
     debug('disconnected from server');
-    this.connected = false;
     this.emit('disconnected');
 };
 
-Connection.prototype.onMessage = function(envelope) {
-    var channel = envelope.channelId;
-
-    debug('received message: \'' + envelope.topic + '\' (ch. -> ' + channel + ')');
-    // Parse the event here.
-
-    // Handle messages on _SYSTEM channel ourselves
-    if (channel === '_SYSTEM') {
-        this.onSystemMessage(envelope);
-        return;
-    }
-
-    if (typeof this.channels[channel] !== 'undefined') {
-        this.channels[channel].injectMessage(envelope);
-    } else {
-        debug('received a message for channel that doesn\'t exist! -> %s', channel);
-    }
-};
-
 /**
- * @private
- */
-Connection.prototype.bindEvents = function() {
-    this.socket.on('connect', bind(this, 'onConnected'));
-    this.socket.on('error', bind(this, 'onError'));
-    this.socket.on('close', bind(this, 'onDisconnected'));
-    this.socket.on('message', bind(this, 'onMessage'));
-};
-
-/**
- * Called when a message from _SYSTEM channel is received
+ * Received a message on _SYSTEM channel
  * @param envelope
  * @private
  */
 Connection.prototype.onSystemMessage = function(envelope) {
-    var topic = envelope.topic;
+    let topic = envelope.topic;
     debug('received _SYSTEM message: %s', topic);
 
-    switch (topic) {
+    switch (topic)
+    {
         case 'close':
             this.close();
             break;
