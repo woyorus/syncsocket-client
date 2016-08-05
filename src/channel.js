@@ -35,7 +35,6 @@ function Channel(connection, spec) {
     this.reportTransition('uninitialized');
 }
 
-
 /**
  * Initializes the channel's state machine
  * @private
@@ -55,20 +54,20 @@ Channel.prototype.initStateMachine = function () {
 Channel.prototype.initStates = function () {
     this.addStates
     (
-        'uninitialized',
+        ['uninitialized',
         'unsynchronized',
         'idle',
         'ready',
-        'scheduled'
+        'scheduled']
     );
 };
 
 Channel.prototype.initEvents = function () {
-    this.addEvent('initialize', 'uninitialized', 'unsynchronized', (spec) => this.onInitialize(spec));
-    this.addEvent('synchronize', ['unsynchronized', 'idle', 'ready', 'scheduled'], 'idle', () => this.onSynchronize());
+    this.addEvent('initialize', 'uninitialized', 'unsynchronized', bind(this, 'onInitialize'));
+    this.addEvent('synchronize', ['unsynchronized', 'idle', 'ready', 'scheduled'], 'idle', bind(this, 'onSynchronize'));
     this.addEvent('cancel', ['ready', 'scheduled'], 'idle');
-    this.addEvent('prepare', 'idle', 'ready', (env) => this.onPrepare(env));
-    this.addEvent('schedule', 'ready', 'scheduled', (env) => this.onSchedule(env));
+    this.addEvent('prepare', 'idle', 'ready', bind(this, 'onPrepare'));
+    this.addEvent('schedule', 'ready', 'scheduled', bind(this, 'onSchedule'));
     this.addEvent('finalize', 'scheduled', 'idle');
 };
 
@@ -78,7 +77,7 @@ Channel.prototype.initEvents = function () {
  * @private
  */
 Channel.prototype.reportTransition = function (toState) {
-    this.channelDebug(' > Reporting transition to state -> %s', toState);
+    this.channelDebug(' > Reporting transition to state -> ' + toState);
     this.publishService('reportstate', {toState: toState});
 };
 
@@ -98,7 +97,7 @@ Channel.prototype.subscribe = function (topic, prepareCallback, fireCallback) {
 };
 
 /**
- * Publishes a message to the channel
+ * Publishes a user message to the channel
  * @param {string} topic
  * @param {object} data
  * @public
@@ -122,6 +121,27 @@ Channel.prototype.publish = function (topic, data) {
     };
 
     this.connection.sendMessage(envelope);
+};
+
+/**
+ * Publishes a service message to the channel
+ * @param topic
+ * @param data
+ * @returns {Channel}
+ * @private
+ */
+Channel.prototype.publishService = function (topic, data) {
+    debug('publishing -service- message: { topic: ' + topic + ', data: ' + data + ' }');
+
+    var envelope =
+    {
+        channelId: this.channelId,
+        topic: 'service.' + topic,
+        data: data
+    };
+
+    this.connection.sendMessage(envelope);
+    return this;
 };
 
 /**
@@ -220,9 +240,9 @@ Channel.prototype.onSynchronize = function () {
         .then(result => {
             if (result.successful === true) {
                 this.channelDebug('sync successful!');
-                this.emit('syncSuccessful', result.precision, result.adjust);
                 this.lastSyncResult = result;
                 this.finalizeTransition();
+                this.emit('syncSuccessful', result.precision, result.adjust);
             } else {
                 this.channelDebug('sync failed!');
                 this.emit('syncFailed', result.precision);
@@ -235,9 +255,7 @@ Channel.prototype.onPrepare = function (envelope) {
     var topicParts = envelope.topic.split('.');
     var userTopic = topicParts[1];
     var callback = this.prepareCallbacks[userTopic];
-    // Delay transition to ready until done() is called from the callback
-    this.deferTransition();
-    callback(envelope.data, () => this.finalizeTransition());
+    callback.call(this, envelope.data);
 };
 
 Channel.prototype.onSchedule = function (envelope) {
@@ -247,7 +265,7 @@ Channel.prototype.onSchedule = function (envelope) {
     var timeticket = envelope.headers['x-cct-timeticket'];
     var fireIn = (timeticket - this.lastSyncResult.adjust) - Date.now();
     setTimeout(() => {
-        callback(envelope.data, envelope);
+        callback(envelope.data);
         this.handleEvent('finalize');
     }, fireIn);
     this.channelDebug('scheduled event: ' + userTopic + ' in ' + fireIn + ' ms');

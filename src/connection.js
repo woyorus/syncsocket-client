@@ -17,7 +17,9 @@ Emitter(Connection.prototype);
 function Connection(uri) {
     if (!(this instanceof Connection)) return new Connection(uri);
     this.channels = {};
-    this.socket = io.connect(uri);
+    let version = require('../package.json').version;
+    let opts = { query: 'instanceId=' + 'cli_' + version };
+    this.socket = io.connect(uri, opts);
     this.bindEvents();
 }
 
@@ -45,7 +47,7 @@ Connection.prototype.joinChannel = function(channelId, canPublish) {
         this.sendRequest('join_channel', channelSpec)
             .then((response) => {
                 debug('joined channel: %s', channelId);
-                var channel = new Channel(that, channelSpec);
+                var channel = new Channel(this, channelSpec);
                 this.channels[channelId] = channel;
                 resolve(channel);
             })
@@ -100,12 +102,14 @@ Connection.prototype.onMessage = function(envelope) {
         return;
     }
 
-    if (typeof this.channels[channel] === 'undefined')
+    let channelObj = this.channels[channel];
+
+    if (typeof channelObj === 'undefined')
     {
         debug('received a message for channel that doesn\'t exist! -> %s', channel);
     }
 
-    this.channels[channel].injectMessage(envelope);
+    channelObj.injectMessage.call(channelObj, envelope);
 };
 
 Connection.prototype.onConnected = function() {

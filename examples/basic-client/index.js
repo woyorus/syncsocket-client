@@ -1,15 +1,25 @@
 var connect = require('../../src/index');
 
 var connection = connect('http://localhost:6024');
-connection.joinChannel('super-channel', { canPublish: true })
+connection.joinChannel('super-channel', true)
     .then(channel => {
-        setTimeout(() => {
-            channel.subscribe('hey', () => {
-                console.log('prephey');
-                setTimeout(() => channel.finalizeTransition(), 500);
-            }, () => console.log('fire_hey'));
-            channel.publish('hey', { go: true });
-        }, 1000);
-
+        channel.on('syncSuccessful', () => channelSynchronized(channel));
     })
     .catch(err => console.error(err));
+
+function channelSynchronized(channel) {
+    console.log('im ready');
+    channel.subscribe('hi',
+        function (data) {
+            // Prepare callback
+            console.log("I'm getting ready...");
+            //this.finalizeTransition.call(this);
+            channel.deferTransition();
+            channel.finalizeTransition();
+        }, function (data) {
+            // Fire callback
+            console.log("Boom!");
+        }
+    );
+    channel.publish('hi', {});
+}
