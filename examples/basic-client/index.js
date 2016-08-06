@@ -7,15 +7,13 @@ connection.joinChannel('super-channel', true)
     })
     .catch(err => console.error(err));
 
+
 function channelSynchronized(channel) {
     console.log('im ready');
     channel.subscribe('hi',
         function (data) {
             // Prepare callback
             console.log("I'm getting ready...");
-            //this.finalizeTransition.call(this);
-            channel.deferTransition();
-            channel.finalizeTransition();
         }, function (data) {
             // Fire callback
             console.log("Boom!");
@@ -23,3 +21,4 @@ function channelSynchronized(channel) {
     );
     channel.publish('hi', {});
 }
+

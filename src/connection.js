@@ -18,7 +18,10 @@ function Connection(uri) {
     if (!(this instanceof Connection)) return new Connection(uri);
     this.channels = {};
     let version = require('../package.json').version;
-    let opts = { query: 'instanceId=' + 'cli_' + version };
+    let opts = {
+        query: 'instanceId=' + 'js_cli_' + version,
+        'sync disconnect on unload': true
+    };
     this.socket = io.connect(uri, opts);
     this.bindEvents();
 }
@@ -83,7 +86,7 @@ Connection.prototype.sendMessage = function(envelope) {
 Connection.prototype.bindEvents = function() {
     this.socket.on('connect', bind(this, 'onConnected'));
     this.socket.on('error', bind(this, 'onError'));
-    this.socket.on('close', bind(this, 'onDisconnected'));
+    this.socket.on('disconnect', bind(this, 'onDisconnected'));
     this.socket.on('message', bind(this, 'onMessage'));
 };
 

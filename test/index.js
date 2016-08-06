@@ -18,52 +18,43 @@ server.listen(env.port);
 describe('connection', function () {
     this.timeout(30000);
 
-    var connection;
-
-    beforeEach(function (done) {
-        connection = connect(env.url);
-        connection.on('connected', () => done());
-    });
-
-    afterEach(function (done) {
-        connection.on('disconnected', () => done());
-        connection.close();
-    });
-
-
-    it('should join channel', function (done) {
-        var connection = connect(env.url);
-        connection.on('connected', function () {
-            connection.joinChannel(env.testChannelId)
-                .then(channel => {
-                    expect(channel).to.be.an('object');
-                    done();
-                })
-                .catch(err => done(err));
+    it('should connect to the server', function (done) {
+        var conn = connect(env.url);
+        conn.on('connected', () => {
+            conn.close();
+            done();
         });
     });
 
-    it('should post and receive a message', function (done) {
-        var connection = connect(env.url);
-        connection.on('connected', () => {
-            connection.joinChannel(env.testChannelId, { canPublish: true })
-                .then(channel => {
-                    channel.on('syncSuccessful', () => {
-                        let prepareWasCalled = false;
-                        channel.subscribe('testTopic',
-                            () => {
-                                console.log('prepare');
-                                prepareWasCalled = true;
-                                channel.finalizeTransition();
-                            },
-                            () => {
-                                console.log('fire');
-                                expect(prepareWasCalled).to.be.true;
-                                done();
-                            });
-                        setTimeout(() => channel.publish('testTopic'), 500);
-                    });
-                });
+    it('should disconnect from the server', function (done) {
+        var conn = connect(env.url);
+        conn.on('connected', () => {
+            conn.on('disconnected', () => done());
+            conn.close();
+        });
+    });
+
+    it('should join an existing channel', function (done) {
+        var conn = connect(env.url);
+        conn.on('connected', () => {
+            conn.joinChannel(env.testChannelId, false).then(channel => {
+                expect(channel).to.be.an('object');
+                expect(channel.channelId).to.be.equal(env.testChannelId);
+                conn.close();
+                done();
+            }).catch(err => done(err));
+        });
+    });
+
+    it('should not join a non-existing channel', function (done) {
+        var conn = connect(env.url);
+        conn.on('connected', () => {
+            conn.joinChannel('fakeChannel', false).then(channel => {
+                done(new Error('joined a channel that should not exist'));
+            }).catch(err => {
+                // error case, test passed.
+                done();
+            });
         });
     });
 });
