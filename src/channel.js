@@ -1,7 +1,6 @@
 const Emitter = require('component-emitter');
 const ObjectFsm = require('object-fsm');
 const ClockClient = require('syncsocket-clock-client');
-const inherits = require('inherits');
 const debug = require('debug')('syncsocket-client:channel');
 const bind = require('component-bind');
 
