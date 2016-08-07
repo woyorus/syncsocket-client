@@ -270,5 +270,5 @@ Channel.prototype.onSchedule = function (envelope) {
 };
 
 Channel.prototype.channelDebug = function (msg) {
-    debug('[%s][%s] %s', this.channelId, this.state, msg);
+    debug('[%s][%s] %s', this.channelId, this.currentState, msg);
 };
