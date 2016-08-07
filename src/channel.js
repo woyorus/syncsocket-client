@@ -234,17 +234,16 @@ Channel.prototype.onInitialize = function (spec) {
 Channel.prototype.onSynchronize = function () {
     this.channelDebug('Synchronizing with timeserver \'' + this.timeserver + '\'...');
     this.deferTransition();
-
     this.clockClient.sync()
         .then(result => {
             if (result.successful === true) {
                 this.channelDebug('sync successful!');
                 this.lastSyncResult = result;
                 this.finalizeTransition();
-                this.emit('syncSuccessful', result.precision, result.adjust);
+                this.emit('syncSuccessful', result);
             } else {
                 this.channelDebug('sync failed!');
-                this.emit('syncFailed', result.precision);
+                this.emit('syncFailed', result);
             }
         })
         .catch(err => console.error(err));

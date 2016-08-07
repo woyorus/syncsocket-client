@@ -31,12 +31,12 @@
     "debug": "2.2.0",
     "object-fsm": "0.5.2",
     "socket.io-client": "1.4.8",
-    "syncsocket-clock-client": "0.1.4"
+    "syncsocket-clock-client": "0.1.5"
   },
   "devDependencies": {
     "chai": "3.5.0",
     "istanbul": "0.4.4",
     "mocha": "2.5.3",
-    "syncsocket": "0.1.2"
+    "syncsocket": "0.1.4"
   }
 }
