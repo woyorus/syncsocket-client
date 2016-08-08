@@ -112,10 +112,10 @@ describe('channel', function () {
 
     it('should receive prepare call and then fire call', function (done) {
         var conn = connect(env.url);
-        var prepareReceived = false;
         conn.on('connected', () => {
             conn.joinChannel(env.testChannelId, true).then(ch => {
                 ch.on('syncSuccessful', syncResult => {
+                    var prepareReceived = false;
                     ch.subscribe('testTopic',
                         () => {
                             prepareReceived = true;
