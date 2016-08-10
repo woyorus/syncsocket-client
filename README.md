@@ -2,7 +2,8 @@
 
 Synchronized messaging application framework client
 
-[![Travis](https://img.shields.io/travis/woyorus/syncsocket-client.svg?maxAge=2592000)](<>) [![Codecov](https://img.shields.io/codecov/c/github/woyorus/syncsocket-client.svg?maxAge=2592000)](<>)
+[![Build Status](https://travis-ci.org/woyorus/syncsocket-client.svg?branch=master)](https://travis-ci.org/woyorus/syncsocket-client) [![codecov](https://codecov.io/gh/woyorus/syncsocket-client/branch/master/graph/badge.svg)](https://codecov.io/gh/woyorus/syncsocket-client)
+
 
 # API Docs
 
