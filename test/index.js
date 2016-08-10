@@ -29,7 +29,10 @@ describe('syncsocket-client', function () {
 
         it('should not connect to server which doesn\'t exist', function (done) {
             var conn = connect('http://dfaesf234rfgy234f23f23f.ca');
-            conn.on('connection-error', () => done());
+            conn.on('connection-error', () => {
+                conn.removeAllListeners('connection-error');
+                done();
+            });
         });
     });
 
@@ -54,14 +57,6 @@ describe('Connection', function () {
         it('should disconnect from the server', function (done) {
             conn.on('disconnected', () => done());
             conn.close();
-        });
-    });
-
-    it('should not connect to server which doesn\'t exist', function (done) {
-        var conn = connect('http://dfaesf234rfgy234f23f23f.ca');
-        conn.on('connection-error', () => {
-            conn.removeAllListeners('connection-error');
-            done();
         });
     });
 
