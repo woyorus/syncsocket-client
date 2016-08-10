@@ -2,10 +2,43 @@
 
 Synchronized messaging application framework client
 
-[![Travis](https://img.shields.io/travis/woyorus/syncsocket-client.svg?maxAge=2592000)]() [![Codecov](https://img.shields.io/codecov/c/github/woyorus/syncsocket-client.svg?maxAge=2592000)]()
+[![Build Status](https://travis-ci.org/woyorus/syncsocket-client.svg?branch=master)](https://travis-ci.org/woyorus/syncsocket-client) [![codecov](https://codecov.io/gh/woyorus/syncsocket-client/branch/master/graph/badge.svg)](https://codecov.io/gh/woyorus/syncsocket-client)
 
 
 # API Docs
+
+## connect
+
+Attempts connection to a SyncSocket server.
+
+**Parameters**
+
+-   `uri` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Server URI
+
+Returns **[Connection](#connection)** `Connection` object.
+
+## Connection
+
+Creates new `Connection` object
+
+**Parameters**
+
+-   `uri`  URI of SyncSocket server (e.g. <http://localhost:5579>)
+
+### close
+
+Disconnects from the server
+
+### joinChannel
+
+Attempt joining a channel with id `channelId`.
+
+**Parameters**
+
+-   `channelId`  
+-   `canPublish`  
+
+Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)** Fulfilled promise returns the `Channel` object, rejected — error message.
 
 ## Channel
 
@@ -37,36 +70,3 @@ Publishes a user message to the channel
 
 -   `topic` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `data` **[object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)** 
-
-## Connection
-
-Creates new `Connection` object
-
-**Parameters**
-
--   `uri`  URI of SyncSocket server (e.g. <http://localhost:5579>)
-
-### close
-
-Disconnects from the server
-
-### joinChannel
-
-Attempt joining a channel with id `channelId`.
-
-**Parameters**
-
--   `channelId`  
--   `canPublish`  
-
-Returns **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)** Fulfilled promise returns the `Channel` object, rejected — error message.
-
-## connect
-
-Attempts connection to a SyncSocket server.
-
-**Parameters**
-
--   `uri` **[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String)** Server URI
-
-Returns **[Connection](#connection)** `Connection` object.
