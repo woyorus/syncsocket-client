@@ -101,11 +101,9 @@ describe('Channel', function () {
             conn.close();
             done();
         }).catch(err => done(err));
-
     });
 
     it('should begin synchronization once created', function (done) {
-
         conn.joinChannel(env.testChannelId, false).then(ch => {
             expect(ch.currentState).to.not.be.eql('idle');
             ch.on('syncSuccessful', syncResult => {
