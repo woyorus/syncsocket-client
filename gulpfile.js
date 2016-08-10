@@ -29,7 +29,7 @@ gulp.task('lint', function () {
         '**/*.js',
         '!node_modules/**',
         '!coverage/**',
-        '!syncsocket-client.js'
+        '!syncsocket.js'
     ])
         .pipe(eslint())
         .pipe(eslint.format())
