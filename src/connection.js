@@ -88,6 +88,7 @@ Connection.prototype.bindEvents = function() {
     this.socket.on('error', bind(this, 'onError'));
     this.socket.on('disconnect', bind(this, 'onDisconnected'));
     this.socket.on('message', bind(this, 'onMessage'));
+    this.socket.on('connect_error', bind(this, 'onConnectionError'));
 };
 
 /**
@@ -128,6 +129,11 @@ Connection.prototype.onError = function(err) {
 Connection.prototype.onDisconnected = function() {
     debug('disconnected from server');
     this.emit('disconnected');
+};
+
+Connection.prototype.onConnectionError = function () {
+    debug('connection error');
+    this.emit('connection-error');
 };
 
 /**
