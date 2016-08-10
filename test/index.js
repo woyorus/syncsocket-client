@@ -59,7 +59,10 @@ describe('Connection', function () {
 
     it('should not connect to server which doesn\'t exist', function (done) {
         var conn = connect('http://dfaesf234rfgy234f23f23f.ca');
-        conn.on('connection-error', () => done());
+        conn.on('connection-error', () => {
+            conn.removeAllListeners('connection-error');
+            done();
+        });
     });
 
     describe('joinChannel', function () {
