@@ -15803,7 +15803,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.2.1",
+		"version": "0.2.2",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {
@@ -15852,7 +15852,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			"istanbul": "0.4.4",
 			"json-loader": "0.5.4",
 			"mocha": "3.0.2",
-			"syncsocket": "0.2.1",
+			"syncsocket": "0.2.2",
 			"webpack-stream": "3.2.0"
 		}
 	};
