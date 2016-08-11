@@ -182,11 +182,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var channel = envelope.channelId;
 	    debug('received message: \'' + envelope.topic + '\' (ch. -> ' + channel + ')');
 
-	    if (channel === '_SYSTEM') {
-	        this.onSystemMessage(envelope);
-	        return;
-	    }
-
 	    var channelObj = this.channels[channel];
 
 	    if (typeof channelObj === 'undefined') {
@@ -198,38 +193,39 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Connection.prototype.onConnected = function () {
 	    debug('connected to server');
+	    /**
+	     * Client successfully connected to server
+	     * @event Connection#connected
+	     */
 	    this.emit('connected');
 	};
 
 	Connection.prototype.onError = function (err) {
-	    debug('ERROR: ' + err);
+	    debug('Error: ' + err);
+	    /**
+	     * Connection error
+	     * @event Connection#error
+	     * @type {error} error object
+	     */
 	    this.emit('error', err);
 	};
 
 	Connection.prototype.onDisconnected = function () {
 	    debug('disconnected from server');
+	    /**
+	     * Client disconnected from server
+	     * @event Connection#disconnected
+	     */
 	    this.emit('disconnected');
 	};
 
 	Connection.prototype.onConnectionError = function () {
 	    debug('connection error');
+	    /**
+	     * Error while connecting to server
+	     * @event Connection#connection-error
+	     */
 	    this.emit('connection-error');
-	};
-
-	/**
-	 * Received a message on _SYSTEM channel
-	 * @param envelope
-	 * @private
-	 */
-	Connection.prototype.onSystemMessage = function (envelope) {
-	    var topic = envelope.topic;
-	    debug('received _SYSTEM message: %s', topic);
-
-	    switch (topic) {
-	        case 'close':
-	            this.close();
-	            break;
-	    }
 	};
 
 /***/ },
@@ -8050,7 +8046,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Report every successful transition back to server
 	    this.on('didTransition', function (fromState, toState) {
 	        this.reportTransition(toState);
-	        this.emit('transition', fromState, toState);
+	        /**
+	         * Channel switched state
+	         * @event Channel#transition
+	         * @type {object}
+	         * @property {string} from State transition was from
+	         * @property {string} to State transitioned to
+	         */
+	        this.emit('transition', { from: fromState, to: toState });
 	    });
 	};
 
@@ -8081,8 +8084,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Subscribes for messages on given `topic`.
 	 * Subscribing to topic `#` will make you subscribe to any message in the channel.
 	 * @param {string} topic
-	 * @param {function(*):*} prepareCallback -- The callback called during prepare transition
-	 * @param {function(*):*} fireCallback -- The callback called during the 'fire' event
+	 * @param {function(*):*} prepareCallback The callback called during prepare transition
+	 * @param {function(*):*} fireCallback The callback called during the 'fire' event
 	 * @public
 	 */
 	Channel.prototype.subscribe = function (topic, prepareCallback, fireCallback) {
@@ -8095,6 +8098,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Publishes a user message to the channel
 	 * @param {string} topic
 	 * @param {object} data
+	 * @fires Channel#error
 	 * @public
 	 */
 	Channel.prototype.publish = function (topic, data) {
@@ -8103,6 +8107,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.canPublish === false) {
 	        var reason = 'insufficient privileges for publishing messages (channel: ' + this.channelId + ')';
 	        this.channelDebug(reason);
+	        /**
+	         * Error in channel
+	         * @event Channel#error
+	         * @type {string}
+	         */
 	        this.emit('error', reason);
 	        return;
 	    }
@@ -8196,14 +8205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    switch (topicParts[1]) {
 	        case 'initialize':
 	            this.handleEvent('initialize', data);
-	            break;
-
-	        case 'synchronize':
 	            this.handleEvent('synchronize');
-	            break;
-
-	        case 'initialState':
-	            this.emit('initialState', data);
 	            break;
 
 	        default:
@@ -8214,7 +8216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Channel.prototype.onInitialize = function (spec) {
 	    if (typeof spec.timeserver === 'undefined') {
-	        this.channelDebug('Initialized with undefined timeserver');
+	        console.error('Initialized with undefined timeserver');
 	    }
 	    this.timeserver = spec.timeserver;
 	    this.channelDebug('Initializing with timeserver \'' + this.timeserver + '\'');
@@ -8231,9 +8233,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.channelDebug('sync successful!');
 	            _this.lastSyncResult = result;
 	            _this.finalizeTransition();
+	            /**
+	             * Synchronization with timeserver succeeded
+	             * @event Channel#syncSuccessful
+	             * @type {object}
+	             * @property {number} error - Reading's max variation from truth (ms)
+	             * @property {number} adjust - Difference between local and remote clocks (ms)
+	             */
 	            _this.emit('syncSuccessful', result);
 	        } else {
 	            _this.channelDebug('sync failed!');
+	            /**
+	             * Synchronization with timeserver failed
+	             * @event Channel#syncFailed
+	             * @type {object}
+	             * @property {number} error - Reading's max variation from truth (ms)
+	             * @property {number} adjust - Difference between local and remote clocks (ms)
+	             */
 	            _this.emit('syncFailed', result);
 	        }
 	    }).catch(function (err) {
@@ -15851,7 +15867,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.2.4",
+		"version": "0.2.5",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {

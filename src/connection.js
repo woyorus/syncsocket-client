@@ -100,11 +100,6 @@ Connection.prototype.onMessage = function(envelope) {
     var channel = envelope.channelId;
     debug('received message: \'' + envelope.topic + '\' (ch. -> ' + channel + ')');
 
-    if (channel === '_SYSTEM') {
-        this.onSystemMessage(envelope);
-        return;
-    }
-
     let channelObj = this.channels[channel];
 
     if (typeof channelObj === 'undefined') {
@@ -116,36 +111,37 @@ Connection.prototype.onMessage = function(envelope) {
 
 Connection.prototype.onConnected = function() {
     debug('connected to server');
+    /**
+     * Client successfully connected to server
+     * @event Connection#connected
+     */
     this.emit('connected');
 };
 
 Connection.prototype.onError = function(err) {
-    debug('ERROR: ' + err);
+    debug('Error: ' + err);
+    /**
+     * Connection error
+     * @event Connection#error
+     * @type {error} error object
+     */
     this.emit('error', err);
 };
 
 Connection.prototype.onDisconnected = function() {
     debug('disconnected from server');
+    /**
+     * Client disconnected from server
+     * @event Connection#disconnected
+     */
     this.emit('disconnected');
 };
 
 Connection.prototype.onConnectionError = function () {
     debug('connection error');
+    /**
+     * Error while connecting to server
+     * @event Connection#connection-error
+     */
     this.emit('connection-error');
-};
-
-/**
- * Received a message on _SYSTEM channel
- * @param envelope
- * @private
- */
-Connection.prototype.onSystemMessage = function(envelope) {
-    let topic = envelope.topic;
-    debug('received _SYSTEM message: %s', topic);
-
-    switch (topic) {
-        case 'close':
-            this.close();
-            break;
-    }
 };

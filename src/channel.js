@@ -46,7 +46,14 @@ Channel.prototype.initStateMachine = function () {
     // Report every successful transition back to server
     this.on('didTransition', function (fromState, toState) {
         this.reportTransition(toState);
-        this.emit('transition', fromState, toState);
+        /**
+         * Channel switched state
+         * @event Channel#transition
+         * @type {object}
+         * @property {string} from State transition was from
+         * @property {string} to State transitioned to
+         */
+        this.emit('transition', { from: fromState, to: toState });
     });
 };
 
@@ -83,8 +90,8 @@ Channel.prototype.reportTransition = function (toState) {
  * Subscribes for messages on given `topic`.
  * Subscribing to topic `#` will make you subscribe to any message in the channel.
  * @param {string} topic
- * @param {function(*):*} prepareCallback -- The callback called during prepare transition
- * @param {function(*):*} fireCallback -- The callback called during the 'fire' event
+ * @param {function(*):*} prepareCallback The callback called during prepare transition
+ * @param {function(*):*} fireCallback The callback called during the 'fire' event
  * @public
  */
 Channel.prototype.subscribe = function (topic, prepareCallback, fireCallback) {
@@ -97,6 +104,7 @@ Channel.prototype.subscribe = function (topic, prepareCallback, fireCallback) {
  * Publishes a user message to the channel
  * @param {string} topic
  * @param {object} data
+ * @fires Channel#error
  * @public
  */
 Channel.prototype.publish = function (topic, data) {
@@ -105,6 +113,11 @@ Channel.prototype.publish = function (topic, data) {
     if (this.canPublish === false) {
         var reason = 'insufficient privileges for publishing messages (channel: ' + this.channelId + ')';
         this.channelDebug(reason);
+        /**
+         * Error in channel
+         * @event Channel#error
+         * @type {string}
+         */
         this.emit('error', reason);
         return;
     }
@@ -199,14 +212,7 @@ Channel.prototype.processServiceMessage = function (envelope) {
     switch (topicParts[1]) {
         case 'initialize':
             this.handleEvent('initialize', data);
-            break;
-
-        case 'synchronize':
             this.handleEvent('synchronize');
-            break;
-
-        case 'initialState':
-            this.emit('initialState', data);
             break;
 
         default:
@@ -217,7 +223,7 @@ Channel.prototype.processServiceMessage = function (envelope) {
 
 Channel.prototype.onInitialize = function (spec) {
     if (typeof spec.timeserver === 'undefined') {
-        this.channelDebug('Initialized with undefined timeserver');
+        console.error('Initialized with undefined timeserver');
     }
     this.timeserver = spec.timeserver;
     this.channelDebug('Initializing with timeserver \'' + this.timeserver + '\'');
@@ -233,9 +239,23 @@ Channel.prototype.onSynchronize = function () {
                 this.channelDebug('sync successful!');
                 this.lastSyncResult = result;
                 this.finalizeTransition();
+                /**
+                 * Synchronization with timeserver succeeded
+                 * @event Channel#syncSuccessful
+                 * @type {object}
+                 * @property {number} error - Reading's max variation from truth (ms)
+                 * @property {number} adjust - Difference between local and remote clocks (ms)
+                 */
                 this.emit('syncSuccessful', result);
             } else {
                 this.channelDebug('sync failed!');
+                /**
+                 * Synchronization with timeserver failed
+                 * @event Channel#syncFailed
+                 * @type {object}
+                 * @property {number} error - Reading's max variation from truth (ms)
+                 * @property {number} adjust - Difference between local and remote clocks (ms)
+                 */
                 this.emit('syncFailed', result);
             }
         })
