@@ -15803,7 +15803,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.1.4",
+		"version": "0.2.1",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {
@@ -15833,7 +15833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			"debug": "2.2.0",
 			"object-fsm": "0.5.2",
 			"socket.io-client": "1.4.8",
-			"syncsocket-clock-client": "0.1.5"
+			"syncsocket-clock-client": "0.1.6"
 		},
 		"devDependencies": {
 			"babel-core": "6.13.2",
@@ -15851,8 +15851,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			"gulp-task-listing": "1.0.1",
 			"istanbul": "0.4.4",
 			"json-loader": "0.5.4",
-			"mocha": "2.5.3",
-			"syncsocket": "0.1.4",
+			"mocha": "3.0.2",
+			"syncsocket": "0.2.1",
 			"webpack-stream": "3.2.0"
 		}
 	};
