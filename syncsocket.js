@@ -8541,7 +8541,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        port: this.serverPort,
 	        path: '/',
 	        method: 'GET',
-	        headers: { 'X-Client-Timestamp': '' + localStampSent }
+	        headers: { 'X-Client-Timestamp': '' + localStampSent },
+	        withCredentials: false
 	    }, (res) => {
 	        if (res.statusCode !== 200) {
 	            cb(new Error('Server response isn\'t 200! (it is ' + res.statusCode + ')'));
@@ -8564,7 +8565,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    request.on('error', function (err) {
 	        cb(err);
 	    });
-	    request.end();
 	};
 
 	ClockClient.prototype.calcHalfRoundTrip = function (stampSent, stampReceived) {
@@ -15833,7 +15833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			"debug": "2.2.0",
 			"object-fsm": "0.5.2",
 			"socket.io-client": "1.4.8",
-			"syncsocket-clock-client": "0.1.6"
+			"syncsocket-clock-client": "0.1.7"
 		},
 		"devDependencies": {
 			"babel-core": "6.13.2",
