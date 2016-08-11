@@ -100,20 +100,18 @@ Connection.prototype.onMessage = function(envelope) {
     var channel = envelope.channelId;
     debug('received message: \'' + envelope.topic + '\' (ch. -> ' + channel + ')');
 
-    if (channel === '_SYSTEM')
-    {
+    if (channel === '_SYSTEM') {
         this.onSystemMessage(envelope);
         return;
     }
 
     let channelObj = this.channels[channel];
 
-    if (typeof channelObj === 'undefined')
-    {
+    if (typeof channelObj === 'undefined') {
         debug('received a message for channel that doesn\'t exist! -> %s', channel);
     }
 
-    channelObj.injectMessage.call(channelObj, envelope);
+    channelObj.injectMessage(envelope);
 };
 
 Connection.prototype.onConnected = function() {
@@ -145,8 +143,7 @@ Connection.prototype.onSystemMessage = function(envelope) {
     let topic = envelope.topic;
     debug('received _SYSTEM message: %s', topic);
 
-    switch (topic)
-    {
+    switch (topic) {
         case 'close':
             this.close();
             break;

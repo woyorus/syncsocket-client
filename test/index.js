@@ -1,26 +1,15 @@
 const expect = require('chai').expect;
 const connect = require('../src/index');
-const Server = require('syncsocket');
 
-const env = {
-    url: 'http://localhost:6066',
-    host: 'localhost',
-    port: 6066,
-    timeserverHost: 'localhost',
-    timeserverPort: 5579,
-    testChannelId: 'test-channel'
-};
-
-var server = new Server();
-server.createChannel({channelId: env.testChannelId});
-server.listen(env.port);
+const TEST_CHANNEL_ID = 'testChannel';
+const TEST_SERVER_URL = 'http://localhost:6066';
 
 describe('syncsocket-client', function () {
     this.timeout(30000);
 
     describe('connect', function () {
         it('should connect to the server', function (done) {
-            var conn = connect(env.url);
+            var conn = connect(TEST_SERVER_URL);
             conn.on('connected', () => {
                 conn.close();
                 done();
@@ -29,23 +18,21 @@ describe('syncsocket-client', function () {
 
         it('should not connect to server which doesn\'t exist', function (done) {
             var conn = connect('http://dfaesf234rfgy234f23f23f.ca');
-            conn.on('connection-error', () => {
-                conn.removeAllListeners('connection-error');
+            conn.once('connection-error', () => {
                 done();
             });
         });
     });
-
 });
 
 describe('Connection', function () {
     var conn;
 
     beforeEach(function (done) {
-        conn = connect(env.url);
+        conn = connect(TEST_SERVER_URL);
         conn.on('connected', () => {
             done();
-        })
+        });
     });
 
     afterEach(function (done) {
@@ -62,9 +49,9 @@ describe('Connection', function () {
 
     describe('joinChannel', function () {
         it('should join an existing channel', function (done) {
-            conn.joinChannel(env.testChannelId, false).then(channel => {
+            conn.joinChannel(TEST_CHANNEL_ID, false).then(channel => {
                 expect(channel).to.be.an('object');
-                expect(channel.channelId).to.be.equal(env.testChannelId);
+                expect(channel.channelId).to.be.equal(TEST_CHANNEL_ID);
                 conn.close();
                 done();
             }).catch(err => done(err));
@@ -73,7 +60,7 @@ describe('Connection', function () {
         it('should not join a non-existing channel', function (done) {
             conn.joinChannel('fakeChannel', false).then(channel => {
                 done(new Error('joined a channel that should not exist'));
-            }).catch(err => {
+            }).catch(_ => {
                 // error case, test passed.
                 done();
             });
@@ -87,10 +74,10 @@ describe('Channel', function () {
     var conn;
 
     beforeEach(function (done) {
-        conn = connect(env.url);
+        conn = connect(TEST_SERVER_URL);
         conn.on('connected', () => {
             done();
-        })
+        });
     });
 
     afterEach(function (done) {
@@ -99,7 +86,7 @@ describe('Channel', function () {
     });
 
     it('should be created in uninitialized state', function (done) {
-        conn.joinChannel(env.testChannelId, false).then(ch => {
+        conn.joinChannel(TEST_CHANNEL_ID, false).then(ch => {
             expect(ch.currentState).to.be.eql('uninitialized');
             conn.close();
             done();
@@ -107,7 +94,7 @@ describe('Channel', function () {
     });
 
     it('should begin synchronization once created', function (done) {
-        conn.joinChannel(env.testChannelId, false).then(ch => {
+        conn.joinChannel(TEST_CHANNEL_ID, false).then(ch => {
             expect(ch.currentState).to.not.be.eql('idle');
             ch.on('syncSuccessful', syncResult => {
                 expect(ch.currentState).to.be.eql('idle');
@@ -119,11 +106,10 @@ describe('Channel', function () {
                 done();
             });
         }).catch(err => done(err));
-
     });
 
     it('should receive messages from self', function (done) {
-        conn.joinChannel(env.testChannelId, true).then(ch => {
+        conn.joinChannel(TEST_CHANNEL_ID, true).then(ch => {
             ch.on('syncSuccessful', syncResult => {
                 ch.subscribe('testTopic',
                     () => {
@@ -135,11 +121,10 @@ describe('Channel', function () {
                 ch.publish('testTopic');
             });
         }).catch(err => done(err));
-
     });
 
     it('should receive prepare call and then fire call', function (done) {
-        conn.joinChannel(env.testChannelId, true).then(ch => {
+        conn.joinChannel(TEST_CHANNEL_ID, true).then(ch => {
             ch.on('syncSuccessful', syncResult => {
                 var prepareReceived = false;
                 ch.subscribe('testTopic',
@@ -155,5 +140,4 @@ describe('Channel', function () {
             });
         }).catch(err => done(err));
     });
-
 });

@@ -51,8 +51,7 @@ Channel.prototype.initStateMachine = function () {
 };
 
 Channel.prototype.initStates = function () {
-    this.addStates
-    (
+    this.addStates(
         ['uninitialized',
         'unsynchronized',
         'idle',
@@ -80,7 +79,6 @@ Channel.prototype.reportTransition = function (toState) {
     this.publishService('reportstate', {toState: toState});
 };
 
-
 /**
  * Subscribes for messages on given `topic`.
  * Subscribing to topic `#` will make you subscribe to any message in the channel.
@@ -104,16 +102,14 @@ Channel.prototype.subscribe = function (topic, prepareCallback, fireCallback) {
 Channel.prototype.publish = function (topic, data) {
     this.channelDebug('publishing message: { topic: ' + topic + ', data: ' + data + ' }');
 
-    if (this.canPublish === false)
-    {
+    if (this.canPublish === false) {
         var reason = 'insufficient privileges for publishing messages (channel: ' + this.channelId + ')';
         this.channelDebug(reason);
         this.emit('error', reason);
         return;
     }
 
-    var envelope =
-    {
+    var envelope = {
         channelId: this.channelId,
         topic: 'user.' + topic,
         data: data
@@ -132,8 +128,7 @@ Channel.prototype.publish = function (topic, data) {
 Channel.prototype.publishService = function (topic, data) {
     debug('publishing -service- message: { topic: ' + topic + ', data: ' + data + ' }');
 
-    var envelope =
-    {
+    var envelope = {
         channelId: this.channelId,
         topic: 'service.' + topic,
         data: data
@@ -150,8 +145,7 @@ Channel.prototype.publishService = function (topic, data) {
  */
 Channel.prototype.injectMessage = function (envelope) {
     var topicParts = envelope.topic.split('.');
-    switch (topicParts[0])
-    {
+    switch (topicParts[0]) {
         case 'user':
             // Check if we have this subscription
             if (this.subscribedTopics.indexOf(topicParts[1]) !== -1 ||
@@ -202,8 +196,7 @@ Channel.prototype.processServiceMessage = function (envelope) {
     var data = envelope.data;
     var topicParts = envelope.topic.split('.');
 
-    switch (topicParts[1])
-    {
+    switch (topicParts[1]) {
         case 'initialize':
             this.handleEvent('initialize', data);
             break;

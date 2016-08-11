@@ -7,7 +7,6 @@ connection.joinChannel('super-channel', true)
     })
     .catch(err => console.error(err));
 
-
 function channelSynchronized(channel) {
     console.log('im ready');
     channel.subscribe('hi',
@@ -16,7 +15,7 @@ function channelSynchronized(channel) {
             console.log("I'm getting ready...");
         }, function (data) {
             // Fire callback
-            console.log("Boom!");
+            console.log('Boom!');
         }
     );
     channel.publish('hi', {});
