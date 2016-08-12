@@ -8261,7 +8261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Channel.prototype.onPrepare = function (envelope) {
 	    var topicParts = envelope.topic.split('.');
 	    var userTopic = topicParts[1];
-	    var callback = this.prepareCallbacks[userTopic];
+	    var callback = this.prepareCallbacks[userTopic] || this.prepareCallbacks['#'];
 	    callback.call(this, envelope.data);
 	};
 
@@ -8270,7 +8270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var topicParts = envelope.topic.split('.');
 	    var userTopic = topicParts[1];
-	    var callback = this.fireCallbacks[userTopic];
+	    var callback = this.fireCallbacks[userTopic] || this.fireCallbacks['#'];
 	    var timeticket = envelope.headers['x-cct-timeticket'];
 	    var fireIn = timeticket - this.lastSyncResult.adjust - Date.now();
 	    setTimeout(function () {
@@ -15868,7 +15868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.2.7",
+		"version": "0.2.8",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {
@@ -15912,6 +15912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			"eslint-config-standard": "5.3.5",
 			"eslint-plugin-promise": "2.0.1",
 			"eslint-plugin-standard": "2.0.0",
+			"ghooks": "1.3.2",
 			"gulp": "3.9.1",
 			"gulp-eslint": "3.0.1",
 			"gulp-istanbul": "1.0.0",
@@ -15922,6 +15923,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			"mocha": "3.0.2",
 			"syncsocket": "0.2.10",
 			"webpack-stream": "3.2.0"
+		},
+		"config": {
+			"ghooks": {
+				"pre-commit": "npm run test"
+			}
 		}
 	};
 
