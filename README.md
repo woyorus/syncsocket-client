@@ -2,7 +2,7 @@
 
 Synchronized messaging application framework client
 
-[![Build Status](https://travis-ci.org/woyorus/syncsocket-client.svg?branch=master)](https://travis-ci.org/woyorus/syncsocket-client) [![codecov](https://codecov.io/gh/woyorus/syncsocket-client/branch/master/graph/badge.svg)](https://codecov.io/gh/woyorus/syncsocket-client) [![npm](https://img.shields.io/npm/v/syncsocket-client.svg?maxAge=2592000)](<>)
+[![Build Status](https://travis-ci.org/woyorus/syncsocket-client.svg?branch=master)](https://travis-ci.org/woyorus/syncsocket-client) [![codecov](https://codecov.io/gh/woyorus/syncsocket-client/branch/master/graph/badge.svg)](https://codecov.io/gh/woyorus/syncsocket-client) [![npm](https://img.shields.io/npm/v/syncsocket-client.svg?maxAge=2592000)](<>) [![npm](https://img.shields.io/npm/dm/syncsocket-client.svg?maxAge=2592000)]() [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 ## API Docs
 
