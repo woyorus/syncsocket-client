@@ -15868,12 +15868,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.2.6",
+		"version": "0.2.7",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {
 			"test": "gulp test",
-			"cover": "gulp test-cov"
+			"cover": "gulp test-cov",
+			"preversion": "gulp test",
+			"version": "gulp build && git add syncsocket.js",
+			"postversion": "git push && git push --tags"
 		},
 		"repository": {
 			"type": "git",
