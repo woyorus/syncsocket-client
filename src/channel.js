@@ -265,14 +265,14 @@ Channel.prototype.onSynchronize = function () {
 Channel.prototype.onPrepare = function (envelope) {
     var topicParts = envelope.topic.split('.');
     var userTopic = topicParts[1];
-    var callback = this.prepareCallbacks[userTopic];
+    var callback = this.prepareCallbacks[userTopic] || this.prepareCallbacks['#'];
     callback.call(this, envelope.data);
 };
 
 Channel.prototype.onSchedule = function (envelope) {
     var topicParts = envelope.topic.split('.');
     var userTopic = topicParts[1];
-    var callback = this.fireCallbacks[userTopic];
+    var callback = this.fireCallbacks[userTopic] || this.fireCallbacks['#'];
     var timeticket = envelope.headers['x-cct-timeticket'];
     var fireIn = (timeticket - this.lastSyncResult.adjust) - Date.now();
     setTimeout(() => {

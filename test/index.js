@@ -140,4 +140,25 @@ describe('Channel', function () {
             });
         }).catch(err => done(err));
     });
+
+    it('should not allow publishing without privileges', function (done) {
+        conn.joinChannel(TEST_CHANNEL_ID, false).then(ch => {
+            ch.on('syncSuccessful', syncResult => {
+                ch.on('error', err => {
+                    expect(err).not.to.be.null;
+                    done();
+                });
+                ch.publish('testTopic');
+            });
+        });
+    });
+
+    it('should receive any messages once subscribed to hash', function (done) {
+        conn.joinChannel(TEST_CHANNEL_ID, true).then(ch => {
+            ch.on('syncSuccessful', syncResult => {
+                ch.subscribe('#', () => {}, () => { done(); });
+                ch.publish('weirdtopic12321d');
+            });
+        });
+    });
 });
