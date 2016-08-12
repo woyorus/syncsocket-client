@@ -100,7 +100,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var version = __webpack_require__(87).version;
 	    var opts = {
 	        query: 'instanceId=' + 'js_cli_' + version,
-	        'sync disconnect on unload': true
+	        'sync disconnect on unload': true,
+	        path: '/syncsocket'
 	    };
 	    this.socket = io.connect(uri, opts);
 	    this.bindEvents();
@@ -15867,7 +15868,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.2.5",
+		"version": "0.2.6",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {
@@ -15916,7 +15917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			"istanbul": "0.4.4",
 			"json-loader": "0.5.4",
 			"mocha": "3.0.2",
-			"syncsocket": "0.2.4",
+			"syncsocket": "0.2.10",
 			"webpack-stream": "3.2.0"
 		}
 	};

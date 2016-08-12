@@ -20,7 +20,8 @@ function Connection(uri) {
     let version = require('../package.json').version;
     let opts = {
         query: 'instanceId=' + 'js_cli_' + version,
-        'sync disconnect on unload': true
+        'sync disconnect on unload': true,
+        path: '/syncsocket'
     };
     this.socket = io.connect(uri, opts);
     this.bindEvents();
