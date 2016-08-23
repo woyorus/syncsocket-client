@@ -18,8 +18,6 @@ Emitter(Channel.prototype);
  * @public
  */
 function Channel(connection, spec) {
-    if (!(this instanceof Channel)) return new Channel(connection, spec);
-
     this.connection = connection;
     this.channelId = spec.channelId;
     this.canPublish = spec.canPublish;

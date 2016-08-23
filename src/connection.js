@@ -15,7 +15,6 @@ Emitter(Connection.prototype);
  * @public
  */
 function Connection(uri) {
-    if (!(this instanceof Connection)) return new Connection(uri);
     this.channels = {};
     let version = require('../package.json').version;
     let opts = {
