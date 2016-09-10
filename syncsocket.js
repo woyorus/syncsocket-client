@@ -186,6 +186,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (typeof channelObj === 'undefined') {
 	        debug('received a message for channel that doesn\'t exist! -> %s', channel);
+	        return;
 	    }
 
 	    channelObj.injectMessage(envelope);
@@ -16090,7 +16091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		"name": "syncsocket-client",
-		"version": "0.2.9",
+		"version": "0.2.10",
 		"description": "Synchronized messaging application framework client",
 		"main": "src/index.js",
 		"scripts": {
@@ -16128,7 +16129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		"devDependencies": {
 			"babel-core": "6.13.2",
 			"babel-eslint": "6.1.2",
-			"babel-loader": "6.2.4",
+			"babel-loader": "6.2.5",
 			"babel-preset-es2015": "6.13.2",
 			"chai": "3.5.0",
 			"eslint-config-standard": "5.3.5",
@@ -16137,13 +16138,13 @@ return /******/ (function(modules) { // webpackBootstrap
 			"ghooks": "1.3.2",
 			"gulp": "3.9.1",
 			"gulp-eslint": "3.0.1",
-			"gulp-istanbul": "1.0.0",
-			"gulp-mocha": "3.0.0",
+			"gulp-istanbul": "1.1.0",
+			"gulp-mocha": "3.0.1",
 			"gulp-task-listing": "1.0.1",
-			"istanbul": "0.4.4",
+			"istanbul": "0.4.5",
 			"json-loader": "0.5.4",
 			"mocha": "3.0.2",
-			"syncsocket": "0.2.10",
+			"syncsocket": "0.2.13",
 			"webpack-stream": "3.2.0"
 		},
 		"config": {
