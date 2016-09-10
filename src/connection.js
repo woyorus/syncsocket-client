@@ -104,6 +104,7 @@ Connection.prototype.onMessage = function(envelope) {
 
     if (typeof channelObj === 'undefined') {
         debug('received a message for channel that doesn\'t exist! -> %s', channel);
+        return;
     }
 
     channelObj.injectMessage(envelope);
